@@ -92,56 +92,7 @@ impl EphemeralSecret {
 impl<'a> From<&'a EphemeralSecret> for PublicKey {
     /// Given an x25519 [`EphemeralSecret`] key, compute its corresponding [`PublicKey`].
     fn from(secret: &'a EphemeralSecret) -> PublicKey {
-        PublicKey((&ED25519_BASEPOINT_TABLE * &secret.0).to_montgomery())
-    }
-}
-
-/// A Diffie-Hellman secret key which may be used more than once, but is
-/// purposefully not serialiseable in order to discourage key-reuse.  This is
-/// implemented to facilitate protocols such as Noise (e.g. Noise IK key usage,
-/// etc.) and X3DH which require an "ephemeral" key to conduct the
-/// Diffie-Hellman operation multiple times throughout the protocol, while the
-/// protocol run at a higher level is only conducted once per key.
-///
-/// Similarly to [`EphemeralSecret`], this type does _not_ have serialisation
-/// methods, in order to discourage long-term usage of secret key material. (For
-/// long-term secret keys, see [`StaticSecret`].)
-///
-/// # Warning
-///
-/// If you're uncertain about whether you should use this, then you likely
-/// should not be using this.  Our strongly recommended advice is to use
-/// [`EphemeralSecret`] at all times, as that type enforces at compile-time that
-/// secret keys are never reused, which can have very serious security
-/// implications for many protocols.
-#[cfg(feature = "reusable_secrets")]
-#[derive(Clone, Zeroize)]
-#[zeroize(drop)]
-pub struct ReusableSecret(pub(crate) Scalar);
-
-#[cfg(feature = "reusable_secrets")]
-impl ReusableSecret {
-    /// Perform a Diffie-Hellman key agreement between `self` and
-    /// `their_public` key to produce a [`SharedSecret`].
-    pub fn diffie_hellman(&self, their_public: &PublicKey) -> SharedSecret {
-        SharedSecret(&self.0 * their_public.0)
-    }
-
-    /// Generate a non-serializeable x25519 [`ReuseableSecret`] key.
-    pub fn new<T: RngCore + CryptoRng>(mut csprng: T) -> Self {
-        let mut bytes = [0u8; 32];
-
-        csprng.fill_bytes(&mut bytes);
-
-        ReusableSecret(clamp_scalar(bytes))
-    }
-}
-
-#[cfg(feature = "reusable_secrets")]
-impl<'a> From<&'a ReusableSecret> for PublicKey {
-    /// Given an x25519 [`ReusableSecret`] key, compute its corresponding [`PublicKey`].
-    fn from(secret: &'a ReusableSecret) -> PublicKey {
-        PublicKey((&ED25519_BASEPOINT_TABLE * &secret.0).to_montgomery())
+        PublicKey((*&ED25519_BASEPOINT_TABLE * &secret.0).to_montgomery())
     }
 }
 
@@ -202,7 +153,7 @@ impl From<[u8; 32]> for StaticSecret {
 impl<'a> From<&'a StaticSecret> for PublicKey {
     /// Given an x25519 [`StaticSecret`] key, compute its corresponding [`PublicKey`].
     fn from(secret: &'a StaticSecret) -> PublicKey {
-        PublicKey((&ED25519_BASEPOINT_TABLE * &secret.0).to_montgomery())
+        PublicKey((*&ED25519_BASEPOINT_TABLE * &secret.0).to_montgomery())
     }
 }
 
