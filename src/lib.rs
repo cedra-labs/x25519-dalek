@@ -15,7 +15,6 @@
 // README.md as the crate documentation.
 
 #![no_std]
-#![cfg_attr(feature = "bench", feature(test))]
 #![cfg_attr(feature = "nightly", deny(missing_docs))]
 #![doc(html_logo_url = "https://doc.dalek.rs/assets/dalek-logo-clear.png")]
 #![doc(html_root_url = "https://docs.rs/x25519-dalek/1.2.0")]

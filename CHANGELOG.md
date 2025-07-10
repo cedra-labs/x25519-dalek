@@ -5,7 +5,7 @@ Entries are listed in reverse chronological order.
 # 1.x Series
 
 ## 1.2
-
+* Updates `rand_core` version to `0.9`.
 * Add module documentation for using the bytes-oriented `x25519()` API.
 * Add implementation of `zeroize::Zeroize` for `PublicKey`.
 * Move unittests to a separate directory.
